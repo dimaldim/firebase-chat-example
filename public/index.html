@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Chat example</title>
+</head>
+
+<body>
+    <h1>Chat</h1>
+    <ul id="messages"></ul>
+    <label for="user-name">Name: </label>
+    <input type="text" placeholder="Your name" id="user-name" />
+    <label for="user-message">Message:</label>
+    <input type="text" placeholder="Message" id="user-message" />
+    <button id="send-message">Send message</button>
+
+ <script src="/__/firebase/8.0.1/firebase-app.js"></script>
+<script src="/__/firebase/8.0.1/firebase-database.js"></script>
+<script src="/__/firebase/init.js"></script>
+<script>
+    const db = firebase.database().ref();
+    const messages = db.child('messages');
+
+    const messagesElement = document.getElementById('messages');
+    const addUser = document.getElementById('send-message');
+
+    // Send new message button listener
+    addUser.addEventListener('click', add);
+
+    // Listen for new child added to the database
+    // and append them.
+    messages.on('child_added', snap => {
+      let message = snap.val();
+      let $el = document.createElement('li');
+
+      $el.innerHTML = message.user + ': ' + message.message;
+      $el.setAttribute('child-key', snap.key);
+      messagesElement.append($el);
+    });
+
+    // Function to add the user name and message to the real-time database.
+    function add() {
+      const messageElement = document.getElementById('user-message');
+      const userNameElement = document.getElementById('user-name');
+
+      if (messageElement && userNameElement) {
+        const message = messageElement.value;
+        const user = userNameElement.value;
+
+        if (message.length && user.length) {
+          messages.push({
+            "user": user,
+            "message": message
+          }, function () {
+            console.log('Message added');
+          });
+        }
+      }
+    }
+</script>
+</body>
+</html>
